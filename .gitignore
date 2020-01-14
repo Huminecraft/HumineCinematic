@@ -1,0 +1,7 @@
+# ide
+.gradle
+.idea
+# minecraft-plugin
+build/
+spigot/
+server/

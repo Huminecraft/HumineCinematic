@@ -1,0 +1,139 @@
+plugins {
+    id "java"
+    id "de.undercouch.download" version "3.4.3"
+}
+
+sourceCompatibility = 1.8
+
+sourceSets.main.java.srcDirs = ['src']
+compileJava.options.encoding = 'UTF-8'
+
+jar {
+    from('src') {
+        include '*.yml'
+    }
+}
+
+ext {
+    spigot_file_name = "spigot-${spigot_version}.jar"
+    server_dir = 'server/'
+    def file = file 'src/plugin.yml'
+    for (int i = 0; i < file.readLines().size(); i++) {
+        def line = file.readLines().get(i).split(": ")
+        if (line[0] == "version") {
+            plugin_version = line[1]
+            break;
+        }
+    }
+}
+
+println "Project $plugin_name version $plugin_version for spigot $spigot_version"
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+task deployPlugin(type: Copy) {
+    group 'minecraft'
+    description 'Create an official build for your plugin'
+    dependsOn build
+    from ('build/libs')
+    include "${plugin_name}.jar"
+    destinationDir file('deployed')
+    rename "${plugin_name}.jar", "${plugin_name}-${plugin_version}.jar"
+    doFirst {
+        file('deployed').mkdirs()
+    }
+}
+
+task installSpigot {
+    group 'minecraft'
+    description 'install spigot into your project'
+    doLast {
+        println "installing last version of spigot for minecraft $spigot_version..."
+        file('spigot').deleteDir()
+        download {
+            src 'https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar'
+            dest 'spigot/bin/BuildTools.jar'
+        }
+        def serverArgs = [new File("bin", "BuildTools.jar"), "--rev", "${spigot_version}"]
+        javaexec {
+            main "-jar"
+            workingDir "spigot"
+            args serverArgs
+        }
+        File libs = new File("libs");
+        for (File lib : libs.listFiles()) {
+            if (lib.name.contains("spigot")) {
+                lib.delete()
+            }
+        }
+        copy {
+            from "spigot/$spigot_file_name"
+            into "libs"
+        }
+    }
+}
+
+task servePlugin {
+    group 'minecraft'
+    description 'Deploy the plugin in the test server'
+    dependsOn build
+    doLast {
+        copy {
+            from "$buildDir/libs"
+            into "$server_dir/plugins"
+        }
+    }
+}
+
+task initServer {
+    group 'minecraft'
+    description 'Init a test server with your plugin'
+    finalizedBy servePlugin
+
+    doLast {
+        file(server_dir).mkdirs()
+        file("$server_dir/plugins").mkdirs()
+        copy {
+            from "libs/${spigot_file_name}"
+            into "$server_dir/bin"
+        }
+        File eula = file("$server_dir/eula.txt")
+        eula.createNewFile()
+        eula.write('eula=true')
+    }
+}
+
+task runServer {
+    group 'minecraft'
+    description 'Run a test server with your plugin'
+
+    if (!file(server_dir).exists()) {
+        dependsOn initServer
+    }
+
+    doLast {
+        def serverArgs = [new File("bin", spigot_file_name)]
+        javaexec {
+            main "-jar"
+            workingDir server_dir
+            args serverArgs
+            standardInput System.in
+        }
+    }
+}
+
+task clearServer {
+    group 'minecraft'
+    description 'Delete the server folder'
+    doLast {
+        delete server_dir
+    }
+}
