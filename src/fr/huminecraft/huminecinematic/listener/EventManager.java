@@ -2,15 +2,11 @@ package fr.huminecraft.huminecinematic.listener;
 
 import fr.huminecraft.huminecinematic.HumineCinematic;
 import fr.huminecraft.huminecinematic.listener.event.PlayerJoin;
+import fr.huminecraft.huminecinematic.listener.event.PlayerLeft;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 
 public class EventManager {
-
-    private final Listener[] listeners = {
-        new PlayerJoin()
-    };
 
     private HumineCinematic humineCinematic;
 
@@ -20,9 +16,9 @@ public class EventManager {
 
     public void registerEvents() {
         PluginManager pluginManager = Bukkit.getPluginManager();
-        for (Listener listener : listeners) {
-            pluginManager.registerEvents(listener, humineCinematic);
-        }
+
+        pluginManager.registerEvents(new PlayerJoin(), humineCinematic);
+        pluginManager.registerEvents(new PlayerLeft(), humineCinematic);
     }
 
 }
