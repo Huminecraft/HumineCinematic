@@ -1,0 +1,26 @@
+{
+	"custom.space_intro": {
+		"sounds": [
+			{
+				"name": "custom/lost-in-space_intro",
+				"stream": true
+			}
+		]
+	},
+	"custom.space_1": {
+		"sounds": [
+			{
+				"name": "custom/lost-in-space_1",
+				"stream": true
+			}
+		]
+	},
+	"custom.space_2": {
+		"sounds": [
+			{
+				"name": "custom/lost-in-space_2",
+				"stream": true
+			}
+		]
+	}
+}
