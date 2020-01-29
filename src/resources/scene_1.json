@@ -1,0 +1,14 @@
+{
+    "script": [
+        {
+            "text": "mon text",
+            "sound": "minecraft:ambient.cave",
+            "delay": 60
+        },
+        {
+            "text": "coucou",
+            "sound": "minecraft:ambient.cave",
+            "delay": 120
+        }
+    ]
+}

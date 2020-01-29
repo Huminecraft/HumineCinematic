@@ -5,19 +5,29 @@ plugins {
 
 sourceCompatibility = 1.8
 
-sourceSets.main.java.srcDirs = ['src']
+sourceSets.main {
+    java.srcDirs = ['src/java']
+    resources.srcDirs = ['src/resources']
+}
+
 compileJava.options.encoding = 'UTF-8'
 
 jar {
-    from('src') {
+    from('src/java') {
         include '*.yml'
+    }
+    manifest {
+        attributes(
+                'Manifest-Version': '1.0',
+                'Class-Path': './'
+        )
     }
 }
 
 ext {
     spigot_file_name = "spigot-${spigot_version}.jar"
     server_dir = 'server/'
-    def file = file 'src/plugin.yml'
+    def file = file 'src/java/plugin.yml'
     for (int i = 0; i < file.readLines().size(); i++) {
         def line = file.readLines().get(i).split(": ")
         if (line[0] == "version") {
@@ -120,7 +130,7 @@ task runServer {
     }
 
     doLast {
-        def serverArgs = [new File("bin", spigot_file_name)]
+        def serverArgs = [new File("bin", spigot_file_name), "nogui"]
         javaexec {
             main "-jar"
             workingDir server_dir
