@@ -15,9 +15,17 @@ public class PlayerJoin implements Listener {
     public final void onPlayerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
         InstanceManager instanceManager = HumineCinematic.instances;
-        Instance instance = instanceManager.registerPlayer(player);
-        instance.setScenes(Scenes.WAKE_UP);
+
+        Instance instance;
+        if (!instanceManager.haveInstance(player)) {
+            instance = instanceManager.registerPlayer(player);
+            instance.setScenes(Scenes.WAKE_UP);
+        } else {
+            instance = instanceManager.registerPlayer(player);
+        }
         instance.start();
+
+
     }
 
 }
